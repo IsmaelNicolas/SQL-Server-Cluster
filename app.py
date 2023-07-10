@@ -1,8 +1,5 @@
-import asyncio
-import concurrent.futures
 from fastapi import FastAPI
 import pyodbc
-import json
 
 
 app = FastAPI()
