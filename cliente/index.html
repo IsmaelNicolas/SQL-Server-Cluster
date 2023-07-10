@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Cliente HTML</title>
+  <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+  <h1>Cliente HTML para el servidor localhost:8000</h1>
+  
+  <h2>Ingresar un producto</h2>
+  <form id="create-form">
+    <label for="id">ID:</label>
+    <input type="text" id="id" name="id" required><br><br>
+    
+    <label for="name">Nombre:</label>
+    <input type="text" id="name" name="name" required><br><br>
+    
+    <label for="value">Valor:</label>
+    <input type="text" id="value" name="value" required><br><br>
+    
+    <input type="submit" value="Enviar">
+  </form>
+  
+  <h2>Productos</h2>
+  <table id="products-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Valor</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody id="products-list"></tbody>
+  </table>
+
+  <script src="client.js"></script>
+</body>
+</html>

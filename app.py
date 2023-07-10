@@ -1,8 +1,16 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import pyodbc
 
-
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Reemplaza "*" con el origen permitido de tu cliente HTML
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 # Configura los detalles de la conexión
 server = '127.0.0.1'  # Dirección IP o nombre de host donde se encuentra Nginx
@@ -32,34 +40,77 @@ async def create_product(product: dict):
 
     return {"message": "Producto creado exitosamente"}
 
-# Función asincrónica para leer los productos
-async def fetch_products():
+# Ruta para actualizar un producto
+@app.put("/products/{product_id}")
+async def update_product(product_id: int, product: dict):
     # Establece la conexión
     conn = pyodbc.connect(conn_str)
 
     # Crea un cursor para ejecutar consultas
     cursor = conn.cursor()
 
-    # Realiza una consulta para obtener los registros de la tabla "product"
-    cursor.execute("SELECT id, name, value FROM schema_test.product")
-    rows = cursor.fetchall()
-
-    # Convertir las tuplas en diccionarios
-    products = []
-    for row in rows:
-        product = {
-            "id": row[0],
-            "name": row[1],
-            "value": row[2]
-        }
-        products.append(product)
+    # Actualiza el registro en la tabla "product"
+    cursor.execute("UPDATE schema_test.product SET name = ?, value = ? WHERE id = ?", product['name'], product['value'], product_id)
+    conn.commit()
 
     # Cierra el cursor y la conexión
     cursor.close()
     conn.close()
 
-    return products
+    return {"message": "Producto actualizado exitosamente"}
 
+# Ruta para eliminar un producto
+@app.delete("/products/{product_id}")
+async def delete_product(product_id: int):
+    # Establece la conexión
+    conn = pyodbc.connect(conn_str)
+
+    # Crea un cursor para ejecutar consultas
+    cursor = conn.cursor()
+
+    # Elimina el registro de la tabla "product"
+    cursor.execute("DELETE FROM schema_test.product WHERE id = ?", product_id)
+    conn.commit()
+
+    # Cierra el cursor y la conexión
+    cursor.close()
+    conn.close()
+
+    return {"message": "Producto eliminado exitosamente"}
+
+# Ruta para buscar un producto por ID
+@app.get("/products/{product_id}")
+async def search_product(product_id: int):
+    # Establece la conexión
+    conn = pyodbc.connect(conn_str)
+
+    # Crea un cursor para ejecutar consultas
+    cursor = conn.cursor()
+
+    # Realiza una consulta para obtener el registro de la tabla "product" por ID
+    cursor.execute("SELECT id, name, value FROM schema_test.product WHERE id = ?", product_id)
+    row = cursor.fetchone()
+
+    if row is None:
+        # Cierra el cursor y la conexión
+        cursor.close()
+        conn.close()
+        return {"message": "Producto no encontrado"}
+
+    # Convierte la tupla en un diccionario
+    product = {
+        "id": row[0],
+        "name": row[1],
+        "value": row[2]
+    }
+
+    # Cierra el cursor y la conexión
+    cursor.close()
+    conn.close()
+
+    return product
+
+# Ruta para obtener todos los productos
 @app.get("/products")
 async def read_products():
     # Establece la conexión
@@ -68,11 +119,11 @@ async def read_products():
     # Crea un cursor para ejecutar consultas
     cursor = conn.cursor()
 
-    # Realiza una consulta para obtener los registros de la tabla "product"
+    # Realiza una consulta para obtener todos los registros de la tabla "product"
     cursor.execute("SELECT id, name, value FROM schema_test.product")
     rows = cursor.fetchall()
 
-    # Convertir las tuplas en diccionarios
+    # Convierte las tuplas en diccionarios
     products = []
     for row in rows:
         product = {
@@ -87,6 +138,3 @@ async def read_products():
     conn.close()
 
     return products
-
-
-
