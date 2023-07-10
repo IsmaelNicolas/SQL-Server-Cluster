@@ -1,0 +1,35 @@
+version: '3'
+services:
+  nginx:
+    image: nginx
+    ports:
+      - 1433:1433
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - sqlserver1
+      - sqlserver2
+
+  sqlserver1:
+    image: mcr.microsoft.com/mssql/server
+    container_name: sqlserver1
+    ports:
+      - 1434:1433
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=YourStrongPassword1
+      - MSSQL_PID=Developer
+    volumes:
+      - ./sqlserver1-data:/var/opt/mssql/data
+
+  sqlserver2:
+    image: mcr.microsoft.com/mssql/server
+    container_name: sqlserver2
+    ports:
+      - 1435:1433
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=YourStrongPassword1
+      - MSSQL_PID=Developer
+    volumes:
+      - ./sqlserver2-data:/var/opt/mssql/data
